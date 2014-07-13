@@ -1,50 +1,68 @@
-
 const St = imports.gi.St;
 const Main = imports.ui.main;
-const Tweener = imports.ui.tweener;
+const Soup = imports.gi.Soup;
+const Lang = imports.lang;
+const Mainloop=imports.mainloop;
+const GLib = imports.gi.GLib; 
 
-let text, button;
-
-function _hideHello() {
-    Main.uiGroup.remove_actor(text);
-    text = null;
+let button;
+let url = 'http://quotes.instaforex.com/get_quotes.php';
+let params = {
+			m: 'json',
+			q: 'gold'
+			};
+function init() {	
+    button = new St.Label();
 }
+const QuotesMenuButton = new Lang.Class({
+	Name: 'QuotesMenuButton',
+	timeout: null,
+	change_timeout_loop: false,
+	
+	_init: function() {
+		this.change_timeoutloop=true;
+		this.refresh();
+	},
 
-function _showHello() {
-    if (!text) {
-        text = new St.Label({ style_class: 'helloworld-label', text: "Hello, world!" });
-        Main.uiGroup.add_actor(text);
-    }
+	load_json_sync: function(url, params) {
+    	const _httpSession = new Soup.SessionSync();
+  		let message = Soup.form_request_new_from_hash('GET',url,params);	
+		_httpSession.send_message(message);
+		this.response = JSON.parse(message.response_body.data);
+	},
 
-    text.opacity = 255;
+	get_bid: function() {
+		this.load_json_sync(url, params);
+		this.bid = this.response.GOLD.bid;
+		button.set_text(this.bid);
+	},
 
-    let monitor = Main.layoutManager.primaryMonitor;
+	refresh: function() {
+    	this.get_bid();
+    	if(this.change_timeoutloop) {
+			this.remove_timeout();
+			this.timeout = Mainloop.timeout_add_seconds(10, Lang.bind(this, this.refresh));
+         	this.change_timeoutloop = false;
+         	return false;
+      	}
+      	return true;
+   	},
 
-    text.set_position(Math.floor(monitor.width / 2 - text.width / 2),
-                      Math.floor(monitor.height / 2 - text.height / 2));
+	remove_timeout: function() {
+    	if(this.timeout) {
+         	Mainloop.source_remove(this.timeout);
+         	this.timeout=null;
+      	}
+   	},
+	
+	destroy: function(){
+      this.remove_timeout();
+	},
 
-    Tweener.addTween(text,
-                     { opacity: 0,
-                       time: 2,
-                       transition: 'easeOutQuad',
-                       onComplete: _hideHello });
-}
-
-function init() {
-    button = new St.Bin({ style_class: 'panel-button',
-                          reactive: true,
-                          can_focus: true,
-                          x_fill: true,
-                          y_fill: false,
-                          track_hover: true });
-    let icon = new St.Icon({ icon_name: 'system-run-symbolic',
-                             style_class: 'system-status-icon' });
-
-    button.set_child(icon);
-    button.connect('button-press-event', _showHello);
-}
+});
 
 function enable() {
+	Quotes = new QuotesMenuButton;
     Main.panel._rightBox.insert_child_at_index(button, 0);
 }
 
