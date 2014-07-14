@@ -13,6 +13,25 @@ let params = {
 			};
 
 const Quotes = new Lang.Class({
+	Name: 		'Quotes',
+	symbol: 	null,	
+	ask: 		null,	
+	bid: 		null,
+	change: 	null,
+	digits: 	null,
+	lasttime: 	null,
+	
+	_init: function() {
+	},
+
+	_load_json_sync: function(QUOTES_URL, params) {
+    	const _httpSession = new Soup.SessionSync();
+  		let message = Soup.form_request_new_from_hash('GET',url,params);	
+		_httpSession.send_message(message);
+		this.json = JSON.parse(message.response_body.data);
+	},
+	
+	
 });
 
 const QuotesMenuButton = new Lang.Class({
