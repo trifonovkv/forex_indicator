@@ -11,9 +11,10 @@ let params = {
 			m: 'json',
 			q: 'gold'
 			};
-function init() {	
-    button = new St.Label();
-}
+
+const Quotes = new Lang.Class({
+});
+
 const QuotesMenuButton = new Lang.Class({
 	Name: 'QuotesMenuButton',
 	timeout: null,
@@ -60,6 +61,10 @@ const QuotesMenuButton = new Lang.Class({
 	},
 
 });
+
+function init() {	
+    button = new St.Label();
+}
 
 function enable() {
 	Quotes = new QuotesMenuButton;
