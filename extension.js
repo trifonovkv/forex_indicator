@@ -71,7 +71,9 @@ const ForexIndicator = new Lang.Class({
 			text: _("Loading..."),
          	y_align: Clutter.ActorAlign.CENTER
      	});
-
+		
+		current_quote = new Quote;		
+	
 		this.actor.add_actor(this.buttonText);
 		this.actor.connect('button-press-event', Lang.bind(this, this.refresh));
 //      	this.actor.connect('key-press-event', Lang.bind(this, this.refresh));
@@ -104,7 +106,6 @@ const ForexIndicator = new Lang.Class({
 	},
 
 	refresh: function() {
-		current_quote = new Quote;
 		current_quote.load_quote(Lang.bind(this, function() {			
 			let txt;
 			if( current_quote.change > 0 )
