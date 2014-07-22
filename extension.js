@@ -83,6 +83,7 @@ const ForexIndicator = new Lang.Class({
 	    	let item = new PopupMenu.PopupMenuItem(SYMBOLS[i]);
 	    	item.connect('activate', Lang.bind(this, function(){
 				current_quote.pair = symbol;
+				this.change_timeoutloop=true;
 				this.refresh();
 	    	}));
 	    	this.menu.addMenuItem(item);
@@ -125,6 +126,7 @@ const ForexIndicator = new Lang.Class({
 
 	offline: function() {
 		this.remove_timeout();
+//		this.change_timeoutloop=false;
 		this.buttonText.set_text(_("Offline"));
 	},
 	
