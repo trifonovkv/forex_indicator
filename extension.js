@@ -7,8 +7,10 @@ const Clutter=imports.gi.Clutter;
 const PanelMenu=imports.ui.panelMenu;
 const PopupMenu=imports.ui.popupMenu;
 const Util = imports.misc.util;
+
 const Gettext = imports.gettext.domain('gnome-shell-extension-forexindicator');
 const _ = Gettext.gettext;
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Config = imports.misc.config;
@@ -120,8 +122,8 @@ const ForexIndicator = new Lang.Class({
             this._online_status = false;
         }
         else {
+			this._online_status = true;
             this._refresh();
-            this._online_status = true;
         }		
     },
 	
@@ -205,7 +207,7 @@ const ForexIndicator = new Lang.Class({
 let forexMenu;
 
 function init() {
-    Convenience.initTranslations('gnome-shell-extension');
+    Convenience.initTranslations('gnome-shell-extension-forexindicator');
 }
 
 function enable() {	
