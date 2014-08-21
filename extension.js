@@ -20,6 +20,7 @@ const FOREX_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.forexindicator';
 const FOREX_PAIR_CURRENT = 'pair-current';
 const FOREX_REFRESH_INTERVAL = 'refresh-interval';
 const FOREX_PRICE_IN_PANEL = 'price-in-panel';
+const FOREX_ONLINE_STATUS = 'online-status';
 
 const QUOTES_URL = 'http://quotes.instaforex.com/get_quotes.php';
 const UP_POINTING = String.fromCharCode(9650);
@@ -32,8 +33,9 @@ const ForexIndicator = new Lang.Class({
     Extends: PanelMenu.Button,
 	
     _init: function() {
-        this._loadConfig();
         this.parent(0.0, "Forex Indicator", false);
+		this._loadConfig();
+        this._online_status = this._onlineStatusConf;
         this.buttonText=new St.Label({ text: _("Loading..."),
                                        y_align: Clutter.ActorAlign.CENTER});	
         this.actor.add_actor(this.buttonText);
@@ -88,12 +90,11 @@ const ForexIndicator = new Lang.Class({
         let item = new PopupMenu.PopupMenuItem(_("Offline / Online"));
         item.connect('activate', Lang.bind(this, this._setOffline));
         this.menu.addMenuItem(item);
-
-        this._online_status = true;
+		
         this._refresh();
     },
 
-    _loadData: function(callback) {
+    _loadData: function() {
         let params = {m: 'json', q: this._currentPair};
         _httpSession = new Soup.Session();
         let message = Soup.form_request_new_from_hash('GET', QUOTES_URL, params);
@@ -106,8 +107,10 @@ const ForexIndicator = new Lang.Class({
     },
 
     _refresh: function() {
-        if(this._online_status == false)
-            return false;
+        if(this._online_status == false) {;
+            this.buttonText.set_text(_("Offline"));
+            return;
+        }
         this._loadData();
         this._removeTimeout();
         this._timeout = Mainloop.timeout_add_seconds(this._refreshInterval, 
@@ -116,7 +119,7 @@ const ForexIndicator = new Lang.Class({
     },
 
     _setOffline: function() {
-        if(this._online_status) {
+        if(this._online_status == true) {
             this._removeTimeout();
             this.buttonText.set_text(_("Offline"));
             this._online_status = false;
@@ -181,6 +184,18 @@ const ForexIndicator = new Lang.Class({
         return this._settings.get_string(FOREX_PRICE_IN_PANEL);
     },
 	
+	get _onlineStatusConf() {
+        if (!this._settings)
+            this._loadConfig();
+        return this._settings.get_boolean(FOREX_ONLINE_STATUS);
+    },
+
+	set _onlineStatusConf(v) {
+        if (!this._settings)
+            this._loadConfig();
+        this._settings.set_boolean(FOREX_ONLINE_STATUS, v);
+    },
+
     _removeTimeout: function() {
         if(this._timeout) {
             Mainloop.source_remove(this._timeout);
@@ -196,6 +211,8 @@ const ForexIndicator = new Lang.Class({
         if (this._timeout)
             Mainloop.source_remove(this._timeout);
         this._timeout = undefined;
+
+		this._onlineStatusConf = this._online_status;
 
         if (this._settingsC) {
             this._settings.disconnect(this._settingsC);

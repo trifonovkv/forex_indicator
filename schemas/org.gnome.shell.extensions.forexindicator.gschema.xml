@@ -10,5 +10,8 @@
 	<key name="price-in-panel" type="s">
 	  	<default>'Bid'</default>
 	</key>
+	<key name="online-status" type="b">
+	  	<default>true</default>
+	</key>
   </schema>
 </schemalist>

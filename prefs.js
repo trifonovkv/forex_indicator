@@ -55,7 +55,7 @@ const ForexPrefsWidget = new GObject.Class({
 		let button = Gtk.RadioButton.new_with_label_from_widget(radio, _("Ask"),
 													{halign: Gtk.Align.CENTER});       
 		button.connect("toggled", Lang.bind(this, function(){
-				this._priceInPanel = "Ask";
+				this._priceInPanel = _("Ask");
 		})); 
 		if (button.label == this._priceInPanel)
 				button.set_active(true);
@@ -64,7 +64,7 @@ const ForexPrefsWidget = new GObject.Class({
 		let button = Gtk.RadioButton.new_with_label_from_widget(radio, _("Bid"),
 													{halign: Gtk.Align.CENTER});       
 		button.connect("toggled", Lang.bind(this, function(){
-				this._priceInPanel = "Bid";
+				this._priceInPanel = _("Bid");
 		})); 
 		if (button.label == this._priceInPanel)
 				button.set_active(true);
