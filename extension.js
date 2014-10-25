@@ -38,51 +38,34 @@ const ForexIndicator = new Lang.Class({
         this._online_status = this._onlineStatusConf;
         this.buttonText=new St.Label({ text: _("Loading..."),
                                        y_align: Clutter.ActorAlign.CENTER});	
-        this.actor.add_actor(this.buttonText);
+        this.actor.add_actor(this.buttonText);        
+		this._buildMenu();
+        this._refresh();
+    },
 
-        let label = new St.Label({ text: _("Symbol")});
-        this.symbol = new St.Label();
-        let item = new PopupMenu.PopupBaseMenuItem({ reactive: false});
-        item.actor.add(this.symbol, { expand: true });
-        item.actor.add(label);		
-        this.menu.addMenuItem(item);
-
-        let label = new St.Label({ text: _("Ask")});
-        this.ask = new St.Label();
-        let item = new PopupMenu.PopupBaseMenuItem({ reactive: false});
-        item.actor.add(this.ask, { expand: true });
-        item.actor.add(label);
-        this.menu.addMenuItem(item);
-
-        let label = new St.Label({ text: _("Bid")});
-        this.bid = new St.Label();
-        let item = new PopupMenu.PopupBaseMenuItem({ reactive: false});
-        item.actor.add(this.bid, { expand: true });
-        item.actor.add(label);
-        this.menu.addMenuItem(item);
-
-        let label = new St.Label({ text: _("Change")});
-        this.change = new St.Label();
-        let item = new PopupMenu.PopupBaseMenuItem({ reactive: false});
-        item.actor.add(this.change, { expand: true });
-        item.actor.add(label);
-        this.menu.addMenuItem(item);
-
-        this.lasttime = new St.Label();
+    _buildMenu: function() {
+        this.menu.removeAll();
+        this.symbol = this._createMenuItem(_("Symbol"));
+        this.ask = this._createMenuItem(_("Ask"));
+        this.bid = this._createMenuItem(_("Bid"));
+        this.change = this._createMenuItem(_("Change"));
+     
+        this.lasttime = new St.Label({ text: _("...")/*,
+                                           x_align: Clutter.ActorAlign.CENTER*/});
         let item = new PopupMenu.PopupBaseMenuItem({ reactive: false});
         item.actor.add(this.lasttime);
         this.menu.addMenuItem(item);
-
-        let item = new PopupMenu.PopupSeparatorMenuItem();
-        this.menu.addMenuItem(item);
-
+      
+        let separator = new PopupMenu.PopupSeparatorMenuItem();
+        this.menu.addMenuItem(separator);
+        
         let item = new PopupMenu.PopupMenuItem(_("Reload"));
         item.connect('activate', Lang.bind(this, function() {
             this._online_status = true;
             this._refresh();
         }));
         this.menu.addMenuItem(item);
-		
+
         let item = new PopupMenu.PopupMenuItem(_("Settings"));
         item.connect('activate', Lang.bind(this, this._onPreferencesActivate));
         this.menu.addMenuItem(item);
@@ -90,8 +73,16 @@ const ForexIndicator = new Lang.Class({
         let item = new PopupMenu.PopupMenuItem(_("Offline / Online"));
         item.connect('activate', Lang.bind(this, this._setOffline));
         this.menu.addMenuItem(item);
-		
-        this._refresh();
+    },
+
+    _createMenuItem: function(text) {
+        let label_right = new St.Label({ text: text});
+        let label_left = new St.Label({ text: _("...")});
+        let item = new PopupMenu.PopupBaseMenuItem({ reactive: false});
+        item.actor.add(label_left, { expand: true });
+        item.actor.add(label_right);		
+        this.menu.addMenuItem(item)
+        return label_left;
     },
 
     _loadData: function() {
@@ -101,17 +92,17 @@ const ForexIndicator = new Lang.Class({
         _httpSession.queue_message(message, Lang.bind(this, function(_httpSession, message) { 
             if (message.status_code !== 200)
 			    return;
-            let json = JSON.parse(message.response_body.data);
-            this._buildUI(json);					
+            let json = JSON.parse(message.response_body.data); 
+            this._refreshUI(json);				
         }));
     },
 
     _refresh: function() {
-        if(this._online_status == false) {;
+        if(this._online_status == false) {
             this.buttonText.set_text(_("Offline"));
             return;
         }
-        this._loadData();
+        this._loadData(this._refreshUI);
         this._removeTimeout();
         this._timeout = Mainloop.timeout_add_seconds(this._refreshInterval, 
                                                 Lang.bind(this, this._refresh));
@@ -142,7 +133,7 @@ const ForexIndicator = new Lang.Class({
         }));
     },
 
-    _buildUI: function(data) {
+    _refreshUI: function(data) {
         for (let i in data) {
             this.symbol.set_text(data[i].symbol);
             this.ask.set_text(data[i].ask);
@@ -158,7 +149,7 @@ const ForexIndicator = new Lang.Class({
         else
             txt = DOWN_POINTING;
 
-        if(this._priceInPanel == "Ask")
+        if(this._priceInPanel == _("Ask"))
             txt = txt + ' ' + this.ask.text;
         else
             txt = txt + ' ' + this.bid.text;
@@ -184,13 +175,13 @@ const ForexIndicator = new Lang.Class({
         return this._settings.get_string(FOREX_PRICE_IN_PANEL);
     },
 	
-	get _onlineStatusConf() {
+	  get _onlineStatusConf() {
         if (!this._settings)
             this._loadConfig();
         return this._settings.get_boolean(FOREX_ONLINE_STATUS);
     },
 
-	set _onlineStatusConf(v) {
+	  set _onlineStatusConf(v) {
         if (!this._settings)
             this._loadConfig();
         this._settings.set_boolean(FOREX_ONLINE_STATUS, v);
@@ -203,7 +194,7 @@ const ForexIndicator = new Lang.Class({
         }
     },
 
-	stop: function() {
+	  stop: function() {
         if (_httpSession !== undefined)
             _httpSession.abort();
         _httpSession = undefined;
@@ -218,6 +209,7 @@ const ForexIndicator = new Lang.Class({
             this._settings.disconnect(this._settingsC);
             this._settingsC = undefined;
         }
+    this.menu.removeAll();
     }
 });
 
