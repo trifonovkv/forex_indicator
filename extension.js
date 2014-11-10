@@ -2,10 +2,10 @@ const St = imports.gi.St;
 const Main = imports.ui.main;
 const Soup = imports.gi.Soup;
 const Lang = imports.lang;
-const Mainloop=imports.mainloop;
-const Clutter=imports.gi.Clutter;
-const PanelMenu=imports.ui.panelMenu;
-const PopupMenu=imports.ui.popupMenu;
+const Mainloop = imports.mainloop;
+const Clutter = imports.gi.Clutter;
+const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
 const Util = imports.misc.util;
 
 const Gettext = imports.gettext.domain('gnome-shell-extension-forexindicator');
@@ -31,15 +31,17 @@ let _httpSession;
 const ForexIndicator = new Lang.Class({
     Name: 'ForexIndicator',
     Extends: PanelMenu.Button,
-	
+
     _init: function() {
         this.parent(0.0, "Forex Indicator", false);
-		this._loadConfig();
+        this._loadConfig();
         this._online_status = this._onlineStatusConf;
-        this.buttonText=new St.Label({ text: _("Loading..."),
-                                       y_align: Clutter.ActorAlign.CENTER});	
-        this.actor.add_actor(this.buttonText);        
-		this._buildMenu();
+        this.buttonText = new St.Label({
+            text: _("Loading..."),
+            y_align: Clutter.ActorAlign.CENTER
+        });
+        this.actor.add_actor(this.buttonText);
+        this._buildMenu();
         this._refresh();
     },
 
@@ -49,16 +51,19 @@ const ForexIndicator = new Lang.Class({
         this.ask = this._createMenuItem(_("Ask"));
         this.bid = this._createMenuItem(_("Bid"));
         this.change = this._createMenuItem(_("Change"));
-     
-        this.lasttime = new St.Label({ text: _("...")/*,
-                                           x_align: Clutter.ActorAlign.CENTER*/});
-        let item = new PopupMenu.PopupBaseMenuItem({ reactive: false});
+
+        this.lasttime = new St.Label({
+            text: _("...")
+        });
+        let item = new PopupMenu.PopupBaseMenuItem({
+            reactive: false
+        });
         item.actor.add(this.lasttime);
         this.menu.addMenuItem(item);
-      
+
         let separator = new PopupMenu.PopupSeparatorMenuItem();
         this.menu.addMenuItem(separator);
-        
+
         let item = new PopupMenu.PopupMenuItem(_("Reload"));
         item.connect('activate', Lang.bind(this, function() {
             this._online_status = true;
@@ -76,55 +81,65 @@ const ForexIndicator = new Lang.Class({
     },
 
     _createMenuItem: function(text) {
-        let label_right = new St.Label({ text: text});
-        let label_left = new St.Label({ text: _("...")});
-        let item = new PopupMenu.PopupBaseMenuItem({ reactive: false});
-        item.actor.add(label_left, { expand: true });
-        item.actor.add(label_right);		
+        let label_right = new St.Label({
+            text: text
+        });
+        let label_left = new St.Label({
+            text: _("...")
+        });
+        let item = new PopupMenu.PopupBaseMenuItem({
+            reactive: false
+        });
+        item.actor.add(label_left, {
+            expand: true
+        });
+        item.actor.add(label_right);
         this.menu.addMenuItem(item)
         return label_left;
     },
 
     _loadData: function() {
-        let params = {m: 'json', q: this._currentPair};
+        let params = {
+            m: 'json',
+            q: this._currentPair
+        };
         _httpSession = new Soup.Session();
         let message = Soup.form_request_new_from_hash('GET', QUOTES_URL, params);
-        _httpSession.queue_message(message, Lang.bind(this, function(_httpSession, message) { 
+        _httpSession.queue_message(message, Lang.bind(this, function(_httpSession, message) {
             if (message.status_code !== 200)
-			    return;
-            let json = JSON.parse(message.response_body.data); 
-            this._refreshUI(json);				
+                return;
+            let json = JSON.parse(message.response_body.data);
+            this._refreshUI(json);
         }));
     },
 
     _refresh: function() {
-        if(this._online_status == false) {
+        if (this._online_status == false) {
             this.buttonText.set_text(_("Offline"));
             return;
         }
         this._loadData(this._refreshUI);
         this._removeTimeout();
-        this._timeout = Mainloop.timeout_add_seconds(this._refreshInterval, 
-                                                Lang.bind(this, this._refresh));
+        this._timeout = Mainloop.timeout_add_seconds(this._refreshInterval,
+            Lang.bind(this, this._refresh));
         return true;
     },
 
     _setOffline: function() {
-        if(this._online_status == true) {
+        if (this._online_status == true) {
             this._removeTimeout();
             this.buttonText.set_text(_("Offline"));
             this._online_status = false;
-        }
-        else {
-			this._online_status = true;
+        } else {
+            this._online_status = true;
             this._refresh();
-        }		
+        }
     },
-	
+
     _onPreferencesActivate: function() {
         Util.spawn(["gnome-shell-extension-prefs", "forex_indicator@trifonovkv.gmail.com"]);
         return 0;
-    },	
+    },
 
     _loadConfig: function() {
         this._settings = Convenience.getSettings(FOREX_SETTINGS_SCHEMA);
@@ -139,21 +154,21 @@ const ForexIndicator = new Lang.Class({
             this.ask.set_text(data[i].ask);
             this.bid.set_text(data[i].bid);
             this.change.set_text(data[i].change);
-            let date = new Date((data[i].lasttime-10800)*1000);
+            let date = new Date((data[i].lasttime - 10800) * 1000);
             this.lasttime.set_text(date.toLocaleString());
         }
 
         let txt;
-        if(this.change > 0)
+        if (this.change > 0)
             txt = UP_POINTING;
         else
             txt = DOWN_POINTING;
 
-        if(this._priceInPanel == _("Ask"))
+        if (this._priceInPanel == _("Ask"))
             txt = txt + ' ' + this.ask.text;
         else
             txt = txt + ' ' + this.bid.text;
-			
+
         this.buttonText.set_text(txt);
     },
 
@@ -161,7 +176,7 @@ const ForexIndicator = new Lang.Class({
         if (!this._settings)
             this._loadConfig();
         return this._settings.get_string(FOREX_PAIR_CURRENT);
-    },		
+    },
 
     get _refreshInterval() {
         if (!this._settings)
@@ -174,27 +189,27 @@ const ForexIndicator = new Lang.Class({
             this._loadConfig();
         return this._settings.get_string(FOREX_PRICE_IN_PANEL);
     },
-	
-	  get _onlineStatusConf() {
+
+    get _onlineStatusConf() {
         if (!this._settings)
             this._loadConfig();
         return this._settings.get_boolean(FOREX_ONLINE_STATUS);
     },
 
-	  set _onlineStatusConf(v) {
+    set _onlineStatusConf(v) {
         if (!this._settings)
             this._loadConfig();
         this._settings.set_boolean(FOREX_ONLINE_STATUS, v);
     },
 
     _removeTimeout: function() {
-        if(this._timeout) {
+        if (this._timeout) {
             Mainloop.source_remove(this._timeout);
-            this._timeout=null;
+            this._timeout = null;
         }
     },
 
-	  stop: function() {
+    stop: function() {
         if (_httpSession !== undefined)
             _httpSession.abort();
         _httpSession = undefined;
@@ -203,13 +218,13 @@ const ForexIndicator = new Lang.Class({
             Mainloop.source_remove(this._timeout);
         this._timeout = undefined;
 
-		this._onlineStatusConf = this._online_status;
+        this._onlineStatusConf = this._online_status;
 
         if (this._settingsC) {
             this._settings.disconnect(this._settingsC);
             this._settingsC = undefined;
         }
-    this.menu.removeAll();
+        this.menu.removeAll();
     }
 });
 
@@ -219,7 +234,7 @@ function init() {
     Convenience.initTranslations('gnome-shell-extension-forexindicator');
 }
 
-function enable() {	
+function enable() {
     forexMenu = new ForexIndicator;
     Main.panel.addToStatusArea('forex-indicator', forexMenu);
 }
