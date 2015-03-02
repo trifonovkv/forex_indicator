@@ -159,7 +159,7 @@ const ForexIndicator = new Lang.Class({
         }
 
         let txt;
-        if (this.change > 0)
+        if (this.change.text > 0)
             txt = UP_POINTING;
         else
             txt = DOWN_POINTING;
