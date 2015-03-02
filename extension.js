@@ -154,7 +154,7 @@ const ForexIndicator = new Lang.Class({
             this.ask.set_text(data[i].ask);
             this.bid.set_text(data[i].bid);
             this.change.set_text(data[i].change);
-            let date = new Date((data[i].lasttime - 10800) * 1000);
+            let date = new Date((data[i].lasttime - 7200) * 1000);
             this.lasttime.set_text(date.toLocaleString());
         }
 
