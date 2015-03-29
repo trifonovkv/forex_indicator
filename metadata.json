@@ -3,5 +3,5 @@
 "name": "Forex indicator",
 "description": "Display Forex quotes",
 "url": "https://github.com/trifonovkv/forex_indicator",
-"shell-version": ["3.10","3.12","3.14"]
+"shell-version": ["3.10","3.12","3.14","3.16"]
 }
