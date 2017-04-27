@@ -65,18 +65,18 @@ const ForexIndicator = new Lang.Class({
         let separator = new PopupMenu.PopupSeparatorMenuItem();
         this.menu.addMenuItem(separator);
 
-        let item = new PopupMenu.PopupMenuItem(_("Reload"));
+        item = new PopupMenu.PopupMenuItem(_("Reload"));
         item.connect('activate', Lang.bind(this, function() {
             this._online_status = true;
             this._refresh();
         }));
         this.menu.addMenuItem(item);
 
-        let item = new PopupMenu.PopupMenuItem(_("Settings"));
+        item = new PopupMenu.PopupMenuItem(_("Settings"));
         item.connect('activate', Lang.bind(this, this._onPreferencesActivate));
         this.menu.addMenuItem(item);
 
-        let item = new PopupMenu.PopupMenuItem(_("Offline / Online"));
+        item = new PopupMenu.PopupMenuItem(_("Offline / Online"));
         item.connect('activate', Lang.bind(this, this._setOffline));
         this.menu.addMenuItem(item);
     },
