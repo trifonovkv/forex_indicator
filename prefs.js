@@ -67,7 +67,7 @@ const ForexPrefsWidget = new GObject.Class({
         if (button.label == this._priceInPanel)
             button.set_active(true);
         vbox.add(button);
-        let button = Gtk.RadioButton.new_with_label_from_widget(radio, _("Bid"), {
+        button = Gtk.RadioButton.new_with_label_from_widget(radio, _("Bid"), {
             halign: Gtk.Align.CENTER
         });
         button.connect("toggled", Lang.bind(this, function() {
@@ -80,8 +80,8 @@ const ForexPrefsWidget = new GObject.Class({
         hbox.pack_end(vbox, false, false, 100);
         this.add(hbox);
 
-        let hbox = new Gtk.HBox();
-        let label = new Gtk.Label({
+        hbox = new Gtk.HBox();
+        label = new Gtk.Label({
             label: _("Time Update"),
             hexpand: true,
             halign: Gtk.Align.CENTER
@@ -106,8 +106,8 @@ const ForexPrefsWidget = new GObject.Class({
         hbox.pack_end(spinButton, false, false, 100);
         this.add(hbox);
         
-        let hbox = new Gtk.HBox();
-        let label = new Gtk.Label({
+        hbox = new Gtk.HBox();
+        label = new Gtk.Label({
             label: _("Symbols"),
             use_markup: true,
             halign: Gtk.Align.START
