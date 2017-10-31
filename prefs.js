@@ -12,6 +12,7 @@ const Convenience = Me.imports.convenience;
 const Lang = imports.lang;
 
 const FOREX_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.forexindicator';
+const FOREX_PAIR_INVERT = 'pair-invert';
 const FOREX_PAIR_CURRENT = 'pair-current';
 const FOREX_REFRESH_INTERVAL = 'refresh-interval';
 const FOREX_PRICE_IN_PANEL = 'price-in-panel';
@@ -122,6 +123,35 @@ const ForexPrefsWidget = new GObject.Class({
         hbox.pack_start(label, false, false, 100);
         hbox.pack_end(this._comboBox, false, false, 100);
         this.add(hbox);
+        
+        hbox = new Gtk.HBox();
+        this._button = new Gtk.CheckButton ({label: "Invert Symbol"});
+        hbox.pack_end(this._button, false, false, 100);
+        this.add(hbox);
+        this._button.set_active (this._invertValue);
+        this._button.connect ("toggled", Lang.bind (this, this._toggledCB));
+    },
+    
+    _toggledCB: function () {
+
+        // Make the window title appear or disappear when the checkbox is toggled
+        if (this._button.get_active() == true) {
+            this._invertValue = true
+        } else {
+            this._invertValue = false
+        }
+    },
+    
+    get _invertValue() {
+        if (!this._settings)
+            this._loadConfig();
+        return this._settings.get_boolean(FOREX_PAIR_INVERT);
+    },
+
+    set _invertValue(v) {
+        if (!this._settings)
+            this._loadConfig();
+        this._settings.set_boolean(FOREX_PAIR_INVERT, v);
     },
 
     _onComboChanged: function() {

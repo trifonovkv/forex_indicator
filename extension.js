@@ -17,6 +17,7 @@ const Config = imports.misc.config;
 const Convenience = Me.imports.convenience;
 
 const FOREX_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.forexindicator';
+const FOREX_PAIR_INVERT = 'pair-invert';
 const FOREX_PAIR_CURRENT = 'pair-current';
 const FOREX_REFRESH_INTERVAL = 'refresh-interval';
 const FOREX_PRICE_IN_PANEL = 'price-in-panel';
@@ -151,9 +152,20 @@ const ForexIndicator = new Lang.Class({
 
     _refreshUI: function(data) {
         for (let i in data) {
-            this.symbol.set_text(data[i].symbol);
-            this.ask.set_text(data[i].ask.toString());
-            this.bid.set_text(data[i].bid.toString());
+            if (this._invertValue) {
+                var index_1 = data[i].symbol.substr(0, 3)
+                var index_2 = data[i].symbol.substr(3, 3)
+                var symbol = index_2.concat(index_1)
+            
+                this.symbol.set_text(symbol);
+                this.ask.set_text((1.0 / data[i].ask).toFixed(4).toString());
+                this.bid.set_text((1.0 / data[i].bid).toFixed(4).toString());
+            } else {
+                this.symbol.set_text(data[i].symbol);
+                this.ask.set_text(data[i].ask.toString());
+                this.bid.set_text(data[i].bid.toString());
+            }
+
             this.change.set_text(data[i].change.toString());
             let date = new Date((data[i].lasttime - SERVER_TIME_GMT_DIFF) * 1000);
             this.lasttime.set_text(date.toLocaleString());
@@ -171,6 +183,12 @@ const ForexIndicator = new Lang.Class({
             txt = txt + ' ' + this.bid.text;
 
         this.buttonText.set_text(txt);
+    },
+    
+    get _invertValue() {
+        if (!this._settings)
+            this._loadConfig();
+        return this._settings.get_boolean(FOREX_PAIR_INVERT);
     },
 
     get _currentPair() {

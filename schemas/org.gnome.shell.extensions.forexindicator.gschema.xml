@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-shell-extension-forexindicator">
   <schema id="org.gnome.shell.extensions.forexindicator" path="/org/gnome/shell/extensions/forexindicator/">
+    <key name="pair-invert" type="b">
+	  	<default>false</default>
+	</key>
 	<key name="pair-current" type="s">
 	  	<default>'EURUSD'</default>
 	</key>
